@@ -8,6 +8,11 @@ TODO, setup
 
 == Lambda function
 
+TODO: describe how to create&configure
+
+[Building package instruction](https://docs.aws.amazon.com/lambda/latest/dg/python-package.html#python-package-create-package-with-dependency)
+
+
 === Environment variables
 `TOKEN_SECRET_NAME`
 TODO
