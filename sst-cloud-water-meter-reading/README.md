@@ -19,7 +19,23 @@ zip -r layer.zip python
 # Setup
 
 ## Timestream
-TODO, setup
+1. Open **Timestream** service in AWS console
+1. Click **Create database** button (from service or _Databases_ page)
+1. On "Create database" page:
+   1. Choose **Standard database** in _Choose a configuration_
+   1. Enter **Name**, for example `mydb`
+   1. Confirm creation by clicking **Create database button**
+   1. You will be redirected to _Databases_ page
+1. Navigate to **Tables** page
+1. Click **Create table**
+1. On "Create table" page:
+   1. Select `mydb` (previously created) in **Database name**
+   1. Enter **Table name**, for example `meters`
+   1. Enter **Memory store retention**, several weeks for example
+   1. Enter **Magnetic store retention**, 10 years for example
+   1. Select **Enable magnetic storage writes** option in _Magnetic Storage Writes_, if your are planning to import old data to this table
+   (refer to [docs](https://docs.aws.amazon.com/timestream/latest/developerguide/writes.html#writes.timestamp-past-future) for details)
+   1. Confirm creation by clicking **Create table** button
 
 ## Lambda function
 1. Open **Lambda** service in AWS console
