@@ -4,13 +4,34 @@ Collecting data from water meters to Amazon Timestream.
 Meters connected to [Neptun ProW](https://sstcloud.ru/en/neptun19), which sends data to SST Cloud.
 We will periodically read data from it's [API](https://api.sst-cloud.com/docs/) and save it to our database.
 
+# Code preparation
+We use [requests](https://requests.readthedocs.io/en/master/) library.
+For ability to use it in other projects, we will upload it as a separate layer.
+_The other way is bundle it with our code, for details see [Building package instruction](https://docs.aws.amazon.com/lambda/latest/dg/python-package.html#python-package-create-package-with-dependency)_
+
+For library packing, do:
+```
+mkdir python
+python3.9 -m pip install requests --target python
+zip -r layer.zip python
+```
+
 # Setup
 
 ## Timestream
 TODO, setup
 
 ## Lambda function
-1. Open Lambda service in AWS console
+1. Open **Lambda** service in AWS console
+1. Open **Layers** page (from left menu in _Additional resources_)
+1. Click **Create layer** button
+1. On "Create layer" page:
+   1. Enter **Name**, for example `python-requests`
+   1. By clicking **Upload** button, upload previously created _layer.zip_ file
+   1. Choose both _x86_64_ and _arm64_ in **Compatible architectures**
+   1. Choose _Python 3.9_ in **Compatible runtimes**
+   1. Confirm creation by clicking **Create** button
+1. Go to **Functions** page (from left menu)
 1. Click **Create function** button
 1. On "Create function" page:
    1. Choose **Author from scratch**
@@ -18,13 +39,19 @@ TODO, setup
    1. Choose `Python 3.9` **Runtime**
    1. Choose `arm64` **Architecture** (our code isn't platform-specific and this architecture offers lower cost)
    1. Confirm creation by **Create function** button (predefined value for _execution role_ `Create a new role with basic Lambda permissions` is good for us).
-   We will be redirected to lambda function page.
-
+   We will be redirected to the lambda function page.
+1. On function page, _Code_ tab
+   1. Click **Add layer** button (in _Layers_ block)
+   1. Choose **Custom layers** as _Layer source_
+   1. Select `python-requests` in _Custom layers_
+   1. Select latest available version in _Version_
+   1. Click *Add** button.
+   We will be redirected back to the lambda function page.
 
 
 TODO: describe how to create&configure
 
-[Building package instruction](https://docs.aws.amazon.com/lambda/latest/dg/python-package.html#python-package-create-package-with-dependency)
+
 
 
 ### Environment variables
