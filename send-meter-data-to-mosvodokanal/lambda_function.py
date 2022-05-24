@@ -11,24 +11,62 @@ def lambda_handler(event, context):
     }
 
 
+def dc():
+    return str(int(time.time() * 1000))
+
+
+def readDataBean(id, event_type, volume):
+    return {
+        'id': id,
+        'requestElementId': id,
+        'eventTypeCode': event_type,
+        'commentId': None,
+        'fileId': None,
+        'meterReadingValue': volume,
+    }
+
+
 def submit_meters(cold, hot):
     username = "TODO"   # fetch from secrets
     password = "TODO"   # same
 
-    r = requests.post('https://onewind.mosvodokanal.ru/api/login', data = {'username': username, 'password': password, 'captcha': ''})
+    api_url = 'https://onewind.mosvodokanal.ru/'
+    report_url = api_url + 'api/ReportFormData/get'
 
-    r2 = requests.get('https://onewind.mosvodokanal.ru/api/ReportFormData/get', params={'_dc': str(int(time.time()*1000)), 'reportId': 'NATURAL_PERSON_USER_ACCOUNT_REGISTER', 'page': 1, 'start': 0, 'limit': 25}, cookies=r.cookies, headers={'Referer': 'https://onewind.mosvodokanal.ru/'})
-    account_id = r2.json()['list'][0]['ID']
+    r_auth = requests.post(api_url + 'api/login', data = {'username': username, 'password': password, 'captcha': ''})
+    r_auth.raise_for_status()
+    if (r_auth.status_code != 200
+        or 'authenticated' not in r_auth.json()
+        or not r_auth.json()['authenticated']):
+        raise Exception('Authorization failed: ' + r_auth.text)
+    ch = {'cookies': r_auth.cookies, 'headers': {'Referer': api_url}}
 
-    r3 = requests.post('https://onewind.mosvodokanal.ru/api/NewMeterReadRequest/getOrCreateMeterReadRequest', cookies=r.cookies, headers={'Referer': 'https://onewind.mosvodokanal.ru/'}, data={'accountId': account_id})
-    request_id = r3.json()['requestId']
-    param_list = [{"type":"REQUEST_ID","value":request_id}]
+    r_account = requests.get(report_url, params={'_dc': dc(), 'reportId': 'NATURAL_PERSON_USER_ACCOUNT_REGISTER', 'page': 1, 'start': 0, 'limit': 25}, **ch)
+    r_account.raise_for_status()
+    account_id = r_account.json()['list'][0]['ID']
 
-    r4 = requests.post('https://onewind.mosvodokanal.ru/api/ReportFormData/get', params={'_dc': str(int(time.time()*1000))}, data={'reportId': 'NATURAL_PERSON_METER_READ_REQUEST_PART_DATA_REESTR', 'parameterList': json.dumps(param_list)}, cookies=r.cookies, headers={'Referer': 'https://onewind.mosvodokanal.ru/'})
-    ## CHECK WATER_TYPE_ABBR
-    cold_id = r4.json()['list'][0]['ID']
-    hot_id = r4.json()['list'][1]['ID']
-    event_code = r4.json()['list'][0]['REGISTER_POINT_EVENT_TYPE_CODE']
-    req_data = {"accountId":account_id,"skipValidation":False,"meterReadDataPartBeans":[{"id":cold_id,"requestElementId":cold_id,"eventTypeCode":event_code,"commentId":None,"fileId": None, "meterReadingValue":45},{"id":hot_id,"requestElementId":hot_id,"eventTypeCode":event_code,"commentId":None,"meterReadingValue":22,"fileId":None}]}
+    r_readreq = requests.post(api_url + 'api/NewMeterReadRequest/getOrCreateMeterReadRequest', data={'accountId': account_id}, **ch)
+    r_readreq.raise_for_status()
+    request_id = r_readreq.json()['requestId']
+    param_list = [{'type': 'REQUEST_ID', 'value': request_id}]
 
-    r5 = requests.post('https://onewind.mosvodokanal.ru/api/NaturalPersonMeterRead/send', cookies=r.cookies, headers={'Referer': 'https://onewind.mosvodokanal.ru/'}, json=req_data)
+    r_meters = requests.post(report_url, params={'_dc': dc()}, data={'reportId': 'NATURAL_PERSON_METER_READ_REQUEST_PART_DATA_REESTR', 'parameterList': json.dumps(param_list)}, **ch)
+    r_meters.raise_for_status()
+    meters = r_meters.json()['list']
+    # TODO: separate cold and hot meters by 'WATER_TYPE_ABBR' attribute (hot, cold)
+    cold_id = meters[0]['ID']
+    hot_id = meters[1]['ID']
+    event_code = meters[0]['REGISTER_POINT_EVENT_TYPE_CODE']
+
+    req_data = {
+        'accountId': account_id,
+        'skipValidation': False,
+        'meterReadDataPartBeans': [
+            readDataBean(cold_id, event_code, cold),
+            readDataBean(hot_id, event_code, hot),
+        ]
+    }
+
+    submit = requests.post(api_url + 'api/NaturalPersonMeterRead/send', json=req_data, **ch)
+    submit.raise_for_status()
+    return submit.json()
