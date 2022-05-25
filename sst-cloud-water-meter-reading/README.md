@@ -74,5 +74,9 @@ TODO: describe how to create&configure
 `TOKEN_SECRET_NAME`
 TODO
 
+## CloudWatch
+Reduce retentions period for lambda function logs
+
+
 ### Policies
 TODO
