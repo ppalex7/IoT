@@ -68,6 +68,15 @@ There is two ways:
    1. Select latest available version in _Version_
    1. Click *Add** button.
    We will be redirected back to the lambda function page.
+1. On function page, go to the _Configuration_ tab
+   1. In section _General configuration_, increase **Timeout** to 20 seconds, save
+   1. Edit _Environment variables_ — add the following Key/Value pairs
+   (_keep in mind, that value must be saved without leading or following whitespaces_),
+   then save
+      - `DATABASE_NAME` / `mydb` (use the name from created Timestream database)
+      - `TABLE_NAME` / `meters` (use the name of created table)
+      - `LOCATION` / `home-sweet-home` (enter description for meters location)
+      - `SST_CLOUT_TOKEN` / `your_token`
 
 
 TODO: describe how to create&configure
