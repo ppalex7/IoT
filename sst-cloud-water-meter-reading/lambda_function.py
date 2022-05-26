@@ -63,19 +63,11 @@ def write_records(data):
 
 
 class SSTCloudApi(object):
-    def __init__(self):
-        secret_name = os.environ['TOKEN_SECRET_NAME']
-
-        client = session.client(service_name='secretsmanager')
-        get_secret_value_response = client.get_secret_value(SecretId=secret_name)
-
-        self.token = get_secret_value_response['SecretString']
-
     def call(self, path, **kwargs):
         url = ('https://api.sst-cloud.com' + path).format(**kwargs)
-        authorization = {'Authorization': 'Token {token}'.format(token=self.token)}
+        auth = {'Authorization': 'Token ' + os.environ['SST_CLOUT_TOKEN']}
 
-        response = requests.get(url, headers=authorization)
+        response = requests.get(url, headers=auth)
         response.raise_for_status()
 
         return response.json()
