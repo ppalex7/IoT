@@ -25,7 +25,14 @@ def lambda_handler(event, context):
     house_id = houses[0]['id']
 
     counters = api.call('/houses/{id}/counters/', id=house_id)
-    data = [{'id': c['id'], 'line': c['line'], 'hot_water': c['for_hot_water'], 'value': c['value'] } for c in counters]
+    data = [
+        {
+            'id': c['id'],
+            'line': c['line'],
+            'hot_water': c['for_hot_water'],
+            'value': c['value'],
+        } for c in counters
+    ]
 
     write_records(data)
 
@@ -51,7 +58,7 @@ def write_records(data):
         temp = 'hot' if counter['hot_water'] else 'cold'
         records.append({
             'MeasureValue': str(counter['value']),
-            'Dimensions' : [
+            'Dimensions': [
                 {'Name': 'water_temperature', 'Value': temp},
             ],
         })
