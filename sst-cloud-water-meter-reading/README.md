@@ -16,6 +16,11 @@ python3.9 -m pip install requests --target python
 zip -r layer.zip python
 ```
 
+# Obtaining SST Cloud token
+There is two ways:
+- Find the token in browser by _Network inspector_: after authorization in [SST Cloud web interface](https://web.sst-cloud.com) it will be used in `Authorization` header for each reqest to `api.sst-cloud.com`. Note that the word `Token` is not part of it.
+- Get token by authorising via API https://api.sst-cloud.com/auth/login/. Check [docs](https://api.sst-cloud.com/docs/#/auth/login_create) for details.
+
 # Setup
 
 ## Timestream
