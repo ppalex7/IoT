@@ -134,3 +134,18 @@ so running more often does not make sense.
 1. **Next**
 1. **Next** again (on _Configure tags_)
 1. **Create rule**
+
+# Result
+Readings stored in the database, and could be used to plot graphs or another cool things.
+
+You could view stored reading by executing followed query in Timestream _Query editor_:
+```
+SELECT bin(time, 1h) AS t
+	, MAX(CASE WHEN water_temperature = 'cold' THEN measure_value::bigint ELSE NULL END) AS cold_water_counter
+   , MAX(CASE WHEN water_temperature = 'hot' THEN measure_value::bigint ELSE NULL END) AS hot_water_counter
+FROM "mydb"."meters"
+WHERE time > ago(1d)
+	AND "water_temperature" IN ('cold', 'hot')
+GROUP BY bin(time, 1h)
+ORDER BY t DESC
+```
