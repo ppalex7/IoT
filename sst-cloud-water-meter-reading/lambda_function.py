@@ -70,10 +70,20 @@ def write_records(data):
     logger.info("WriteRecords stat: %s", result['RecordsIngested'])
 
 
-def lambda_handler(event, context):
-    houses = api.call('/houses/')
-    house_id = houses[0]['id']
+def get_house_id():
+    id = os.environ.get('HOUSE_ID')
+    if id is None:
+        logger.info("house_id is not set. Trying to get first from API")
+        houses = api.call('/houses/')
+        id = houses[0]['id']
+    else:
+        logger.info("Got house_id %d from environment", id)
 
+    return id
+
+
+def lambda_handler(event, context):
+    house_id = get_house_id()
     counters = api.call('/houses/{id}/counters/', id=house_id)
     data = [
         {
