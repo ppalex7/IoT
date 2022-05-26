@@ -62,6 +62,8 @@ There is two ways:
    1. Confirm creation by **Create function** button (predefined value for _execution role_ `Create a new role with basic Lambda permissions` is good for us).
    We will be redirected to the lambda function page.
 1. On function page, _Code_ tab
+   1. Copy-paste `lambda_function.py` content from file to _Code source_ editor.
+   1. Click **Deploy**
    1. Click **Add layer** button (in _Layers_ block)
    1. Choose **Custom layers** as _Layer source_
    1. Select `python-requests` in _Custom layers_
