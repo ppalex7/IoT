@@ -60,7 +60,6 @@ def write_records(data):
     print("WriteRecords Status: [%s]" % result['ResponseMetadata']['HTTPStatusCode'])
 
 
-
 class SSTCloudApi(object):
     def __init__(self):
         secret_name = os.environ['TOKEN_SECRET_NAME']
@@ -69,7 +68,6 @@ class SSTCloudApi(object):
         get_secret_value_response = client.get_secret_value(SecretId=secret_name)
 
         self.token = get_secret_value_response['SecretString']
-
 
     def call(self, path, **kwargs):
         url = ('https://api.sst-cloud.com' + path).format(**kwargs)
