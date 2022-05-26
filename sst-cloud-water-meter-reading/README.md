@@ -77,6 +77,21 @@ There is two ways:
       - `TABLE_NAME` / `meters` (use the name of created table)
       - `LOCATION` / `home-sweet-home` (enter description for meters location)
       - `SST_CLOUT_TOKEN` / `your_token`
+1. Open **IAM** service in AWS console
+   1. Go to **Roles** page
+   1. Find role with similiar to then name of created lambda function, e.g. `read-water-meters-role-xxxxxxxx`, open it
+   1. Click **Add permissions** -> **Create inline policy** buttons
+   1. In **Service** _Choose a service_: `Timestream`
+   1. In **Access level** choose _List_ / `DescribeEndpoints`
+   1. Also choose _Write_ / `WriteRecords`
+   1. In **Resources** we need to _Specify table resource ARN for the WriteRecords action._. Click **Add ARN** link:
+      - enter AWS **Region** `your-aws-region` or choose _Any_
+      - enter **Database name** `mydb` or choose _Any_
+      - enter **Table name** `meters` or choose _Any_
+      - click **Add** button
+   1. Click **Review policy** button
+   1. Enter **Name**, for example `write-meters-timestream`
+   1. Click **Create policy** button
 
 
 TODO: describe how to create&configure
