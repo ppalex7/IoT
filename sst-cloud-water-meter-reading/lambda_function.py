@@ -35,7 +35,7 @@ def write_records(data):
     common_attributes = {
         'Dimensions': [
             {'Name': 'service', 'Value': 'water'},
-            {'Name': 'location', 'Value': os.environ['LOCATION_DIMENSION_VALUE']},
+            {'Name': 'location', 'Value': os.environ['LOCATION']},
         ],
         'MeasureName': 'volume',
         'MeasureValueType': 'BIGINT',
