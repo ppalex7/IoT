@@ -22,9 +22,12 @@ There is two ways:
 - Get token by authorising via API https://api.sst-cloud.com/auth/login/. Check [docs](https://api.sst-cloud.com/docs/#/auth/login_create) for details.
 
 # Setup
+It is assumed that all operations in the AWS console will be performed in the same AWS region.
 
-## Timestream
-1. Open **Timestream** service in AWS console
+## Amazon Timestream
+We will create a database in which we will store the readings.
+
+1. Open **Amazon Timestream** service in AWS console
 1. Click **Create database** button (from service or _Databases_ page)
 1. On "Create database" page:
    1. Choose **Standard database** in _Choose a configuration_
@@ -42,7 +45,10 @@ There is two ways:
    (refer to [docs](https://docs.aws.amazon.com/timestream/latest/developerguide/writes.html#writes.timestamp-past-future) for details)
    1. Confirm creation by clicking **Create table** button
 
-## Lambda function
+## AWS Lambda
+The core of the project.
+Create & configure lambda function.
+
 1. Open **Lambda** service in AWS console
 1. Open **Layers** page (from left menu in _Additional resources_)
 1. Click **Create layer** button
@@ -60,16 +66,16 @@ There is two ways:
    1. Choose `Python 3.9` **Runtime**
    1. Choose `arm64` **Architecture** (our code isn't platform-specific and this architecture offers lower cost)
    1. Confirm creation by **Create function** button (predefined value for _execution role_ `Create a new role with basic Lambda permissions` is good for us).
-   We will be redirected to the lambda function page.
+   We will be redirected to the lambda function page
 1. On function page, _Code_ tab
-   1. Copy-paste `lambda_function.py` content from file to _Code source_ editor.
+   1. Copy-paste `lambda_function.py` content from file to _Code source_ editor
    1. Click **Deploy**
    1. Click **Add layer** button (in _Layers_ block)
    1. Choose **Custom layers** as _Layer source_
    1. Select `python-requests` in _Custom layers_
    1. Select latest available version in _Version_
    1. Click *Add** button.
-   We will be redirected back to the lambda function page.
+   We will be redirected back to the lambda function page
 1. On function page, go to the _Configuration_ tab
    1. In section _General configuration_:
       - increase **Timeout** to 20 seconds
@@ -79,35 +85,50 @@ There is two ways:
       - `TABLE_NAME` / `meters` (use the name of created table)
       - `LOCATION` / `home-sweet-home` (enter description for meters location)
       - `SST_CLOUT_TOKEN` / `your_token`
+
+## Identity and Access Management (IAM)
+We need to grant lambda function access for writing data to created Timestream database
+
 1. Open **IAM** service in AWS console
-   1. Go to **Roles** page
-   1. Find role with similiar to then name of created lambda function, e.g. `read-water-meters-role-xxxxxxxx`, open it
-   1. Click **Add permissions** -> **Create inline policy** buttons
-   1. In **Service** _Choose a service_: `Timestream`
-   1. In **Access level** choose _List_ / `DescribeEndpoints`
-   1. Also choose _Write_ / `WriteRecords`
-   1. In **Resources** we need to _Specify table resource ARN for the WriteRecords action._. Click **Add ARN** link:
-      - enter AWS **Region** `your-aws-region` or choose _Any_
-      - enter **Database name** `mydb` or choose _Any_
-      - enter **Table name** `meters` or choose _Any_
-      - click **Add** button
-   1. Click **Review policy** button
-   1. Enter **Name**, for example `write-meters-timestream`
-   1. Click **Create policy** button
-
-
-TODO: describe how to create&configure
-
-
-
-
-### Environment variables
-`TOKEN_SECRET_NAME`
-TODO
+1. Go to **Roles** page
+1. Find role with similiar to then name of created lambda function, e.g. `read-water-meters-role-xxxxxxxx`, open it
+1. Click **Add permissions** -> **Create inline policy** buttons
+1. In **Service** _Choose a service_: `Timestream`
+1. In **Access level** choose _List_ / `DescribeEndpoints`
+1. Also choose _Write_ / `WriteRecords`
+1. In **Resources** we need to _Specify table resource ARN for the WriteRecords action._. Click **Add ARN** link:
+   - enter AWS **Region** `your-aws-region` or choose _Any_
+   - enter **Database name** `mydb` or choose _Any_
+   - enter **Table name** `meters` or choose _Any_
+   - click **Add** button
+1. Click **Review policy** button
+1. Enter **Name**, for example `write-meters-timestream`
+1. Click **Create policy** button
 
 ## CloudWatch
-Reduce retentions period for lambda function logs
+By default, AWS will stores all logs produced by our lambda. Later it will increases AWS usage cost.
+I recommend to configure logs retention period.
 
+1. Open **CloudWatch** service in AWS console
+1. Go to **Log groups** page
+1. Change **Retention** (by clicking on it) for our lambda `/aws/lambda/read-water-meters` _Log group_ from _Never expire_ to desired value, e.g. 1 week
 
-### Policies
-TODO
+## Amazon EventBridge
+That's final step — configuring periodically execution for our lambda.
+
+1. Open **Amazon EventBridge** service in AWS console
+1. Open **Rules** page
+1. Click **Create rule** button
+1. Enter **Name**, for example `every-10-minutes`
+1. Choose **Rule type** _Schedule_
+1. **Next**
+1. Choose **Schedule pattern** _A schedule that runs at a regular rate, such as every 10 minutes._
+1. Enter **Rate expression**, at least 10 minutes.
+The data in the SST cloud is updated with approximately the following period
+1. **Next**
+1. Choose **Target types**: _AWS service_
+1. **Select a target**: _Lambda function_
+1. Select **Function**: our created `read-water-meters`
+1. **Next**
+1. **Next** again (on _Configure tags_)
+1. **Create rule**
