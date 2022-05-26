@@ -49,7 +49,7 @@ There is two ways:
 1. On "Create layer" page:
    1. Enter **Name**, for example `python-requests`
    1. By clicking **Upload** button, upload previously created _layer.zip_ file
-   1. Choose both _x86_64_ and _arm64_ in **Compatible architectures**
+   1. Choose both *x86_64* and _arm64_ in **Compatible architectures**
    1. Choose _Python 3.9_ in **Compatible runtimes**
    1. Confirm creation by clicking **Create** button
 1. Go to **Functions** page (from left menu)
