@@ -116,6 +116,9 @@ I recommend to configure logs retention period.
 ## Amazon EventBridge
 That's final step — configuring periodically execution for our lambda.
 
+My experience says that readings in the SST Cloud is updated every 10 minutes,
+so running more often does not make sense.
+
 1. Open **Amazon EventBridge** service in AWS console
 1. Open **Rules** page
 1. Click **Create rule** button
@@ -123,8 +126,7 @@ That's final step — configuring periodically execution for our lambda.
 1. Choose **Rule type** _Schedule_
 1. **Next**
 1. Choose **Schedule pattern** _A schedule that runs at a regular rate, such as every 10 minutes._
-1. Enter **Rate expression**, at least 10 minutes.
-The data in the SST cloud is updated with approximately the following period
+1. Enter desired **Rate expression**, 20 minutes for example
 1. **Next**
 1. Choose **Target types**: _AWS service_
 1. **Select a target**: _Lambda function_
