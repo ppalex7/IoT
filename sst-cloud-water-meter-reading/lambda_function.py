@@ -10,6 +10,23 @@ from botocore.config import Config
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
 
+
+class SSTCloudApi(object):
+    def call(self, path, **kwargs):
+        url = ('https://api.sst-cloud.com' + path).format(**kwargs)
+        auth = {'Authorization': 'Token ' + os.environ['SST_CLOUT_TOKEN']}
+
+        response = requests.get(url, headers=auth)
+        logging.info("%s response: %d: %s",
+                     url,
+                     response.status_code,
+                     response.text,
+                     )
+        response.raise_for_status()
+
+        return response.json()
+
+
 session = boto3.session.Session()
 timestream_config = Config(
     read_timeout=20,
@@ -17,26 +34,7 @@ timestream_config = Config(
     retries={'max_attempts': 10}
 )
 write_client = session.client('timestream-write', config=timestream_config)
-
-
-def lambda_handler(event, context):
-    api = SSTCloudApi()
-    houses = api.call('/houses/')
-    house_id = houses[0]['id']
-
-    counters = api.call('/houses/{id}/counters/', id=house_id)
-    data = [
-        {
-            'id': c['id'],
-            'line': c['line'],
-            'hot_water': c['for_hot_water'],
-            'value': c['value'],
-        } for c in counters
-    ]
-
-    write_records(data)
-
-    return data
+api = SSTCloudApi()
 
 
 def write_records(data):
@@ -72,17 +70,20 @@ def write_records(data):
     logger.info("WriteRecords stat: %s", result['RecordsIngested'])
 
 
-class SSTCloudApi(object):
-    def call(self, path, **kwargs):
-        url = ('https://api.sst-cloud.com' + path).format(**kwargs)
-        auth = {'Authorization': 'Token ' + os.environ['SST_CLOUT_TOKEN']}
+def lambda_handler(event, context):
+    houses = api.call('/houses/')
+    house_id = houses[0]['id']
 
-        response = requests.get(url, headers=auth)
-        logging.info("%s response: %d: %s",
-                     url,
-                     response.status_code,
-                     response.text,
-                     )
-        response.raise_for_status()
+    counters = api.call('/houses/{id}/counters/', id=house_id)
+    data = [
+        {
+            'id': c['id'],
+            'line': c['line'],
+            'hot_water': c['for_hot_water'],
+            'value': c['value'],
+        } for c in counters
+    ]
 
-        return response.json()
+    write_records(data)
+
+    return data
