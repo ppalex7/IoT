@@ -8,6 +8,12 @@ from botocore.config import Config
 
 
 session = boto3.session.Session()
+timestream_config = Config(
+    read_timeout=20,
+    max_pool_connections=100,
+    retries={'max_attempts': 10}
+)
+write_client = session.client('timestream-write', config=timestream_config)
 
 
 def lambda_handler(event, context):
@@ -24,9 +30,6 @@ def lambda_handler(event, context):
 
 
 def write_records(data):
-    config = Config(read_timeout=20, max_pool_connections = 100, retries={'max_attempts': 10})
-    write_client = session.client('timestream-write', config=Config(read_timeout=20, max_pool_connections = 100, retries={'max_attempts': 10}))
-
     current_time = str(round(time.time()))
 
     common_attributes = {
