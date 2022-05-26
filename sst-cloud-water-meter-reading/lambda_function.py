@@ -1,4 +1,5 @@
 import boto3
+import logging
 import os
 import time
 
@@ -6,6 +7,8 @@ import requests
 
 from botocore.config import Config
 
+logger = logging.getLogger()
+logger.setLevel(logging.INFO)
 
 session = boto3.session.Session()
 timestream_config = Config(
@@ -59,7 +62,7 @@ def write_records(data):
         Records=records,
         CommonAttributes=common_attributes,
         )
-    print("WriteRecords Status: [%s]" % result['ResponseMetadata']['HTTPStatusCode'])
+    logger.info("WriteRecords stat: %s", result['RecordsIngested'])
 
 
 class SSTCloudApi(object):
@@ -68,6 +71,11 @@ class SSTCloudApi(object):
         auth = {'Authorization': 'Token ' + os.environ['SST_CLOUT_TOKEN']}
 
         response = requests.get(url, headers=auth)
+        logging.info("%s response: %d: %s",
+                     url,
+                     response.status_code,
+                     response.text,
+                     )
         response.raise_for_status()
 
         return response.json()
