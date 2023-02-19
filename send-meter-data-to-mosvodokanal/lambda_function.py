@@ -1,5 +1,6 @@
 import json
 import logging
+import os
 import time
 
 import requests
@@ -33,13 +34,14 @@ def readDataBean(id, event_type, volume):
 
 
 def submit_meters(cold, hot):
-    username = "TODO"   # fetch from secrets
-    password = "TODO"   # same
-
     api_url = 'https://onewind.mosvodokanal.ru/'
     report_url = api_url + 'api/ReportFormData/get'
 
-    r_auth = requests.post(api_url + 'api/login', data = {'username': username, 'password': password, 'captcha': ''})
+    auth_data = {
+        'username': os.environ['LOGIN'],
+        'password': os.environ['PASSWORD'],
+        'captcha': '',
+    }
     r_auth = requests.post(api_url + 'api/login', data=auth_data)
     r_auth.raise_for_status()
     if (r_auth.status_code != 200
