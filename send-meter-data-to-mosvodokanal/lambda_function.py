@@ -48,8 +48,8 @@ def submit_meters(cold, hot):
     r_auth = requests.post(api_url + 'api/login', data=auth_data)
     r_auth.raise_for_status()
     if (r_auth.status_code != 200
-        or 'authenticated' not in r_auth.json()
-        or not r_auth.json()['authenticated']):
+            or 'authenticated' not in r_auth.json()
+            or not r_auth.json()['authenticated']):
         raise Exception('Authorization failed: ' + r_auth.text)
     ch = {'cookies': r_auth.cookies, 'headers': {'Referer': api_url}}
 
