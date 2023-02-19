@@ -11,10 +11,13 @@ logger.setLevel(logging.DEBUG)
 
 
 def lambda_handler(event, context):
-    # TODO implement
+    r = submit_meters(50, 24)
     return {
         'statusCode': 200,
-        'body': 'lambda_result'
+        'body': """
+            Показания отправлены в Мосводоканал.
+            Ответ: {}
+        """.strip().format(json.dumps(r)),
     }
 
 
