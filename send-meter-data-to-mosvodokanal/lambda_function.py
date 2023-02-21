@@ -36,8 +36,10 @@ def parse_input(event):
     try:
         return (int(input['cold']), int(input['hot']))
     except (KeyError, ValueError) as e:
-        logger.error("Values not found or specified in incorrect format. Input was: %s", input)
-        raise Exception("Invalid input")
+        logger.error(
+            "Values not found or has incorrect format in input: %s",
+            input)
+        raise Exception("Invalid input: " + str(e))
 
 
 def dc():
@@ -82,7 +84,10 @@ def submit_meters(cold, hot):
             'limit': 25,
             },
         **ch)
-    logger.debug("Got NATURAL_PERSON_USER_ACCOUNT_REGISTER report: %d, %s", r_account.status_code, r_account.content)
+    logger.debug(
+        "Got NATURAL_PERSON_USER_ACCOUNT_REGISTER report: %d, %s",
+        r_account.status_code,
+        r_account.content)
     r_account.raise_for_status()
     account_id = r_account.json()['list'][0]['ID']
 
@@ -90,7 +95,10 @@ def submit_meters(cold, hot):
         api_url + 'api/NewMeterReadRequest/getOrCreateMeterReadRequest',
         data={'accountId': account_id},
         **ch)
-    logger.debug("MeterReadRequest response: %d, %s", r_readreq.status_code, r_readreq.content)
+    logger.debug(
+        "MeterReadRequest response: %d, %s",
+        r_readreq.status_code,
+        r_readreq.content)
     r_readreq.raise_for_status()
     request_id = r_readreq.json()['requestId']
     param_list = [{'type': 'REQUEST_ID', 'value': request_id}]
@@ -103,7 +111,10 @@ def submit_meters(cold, hot):
             'parameterList': json.dumps(param_list),
         },
         **ch)
-    logger.debug("Got NATURAL_PERSON_METER_READ_REQUEST_PART_DATA_REESTR response: %d, %s", r_meters.status_code, r_meters.content)
+    logger.debug(
+        "NATURAL_PERSON_METER_READ_REQUEST_PART_DATA_REESTR response: %d, %s",
+        r_meters.status_code,
+        r_meters.content)
     r_meters.raise_for_status()
     meters = r_meters.json()['list']
     cold_id = [el['ID'] for el in meters if el['WATER_TYPE_ABBR'] == 'cold'][0]
