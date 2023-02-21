@@ -23,7 +23,16 @@ def lambda_handler(event, context):
     }
 
 
-def parse_input(input):
+def parse_input(event):
+    if 'requestContext' in event \
+            and 'responsePayload' in event \
+            and 'functionArn' in event['requestContext'] \
+            and 'responseContext' in event \
+            and 'responsePayload' in event:
+        input = event['responsePayload']
+    else:
+        input = event
+
     try:
         return (int(input['cold']), int(input['hot']))
     except (KeyError, ValueError) as e:
