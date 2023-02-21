@@ -87,9 +87,8 @@ def submit_meters(cold, hot):
     logger.debug("Got NATURAL_PERSON_METER_READ_REQUEST_PART_DATA_REESTR response: %d, %s", r_meters.status_code, r_meters.content)
     r_meters.raise_for_status()
     meters = r_meters.json()['list']
-    # TODO: separate cold and hot meters by 'WATER_TYPE_ABBR' attribute (hot, cold)
-    cold_id = meters[0]['ID']
-    hot_id = meters[1]['ID']
+    cold_id = [el['ID'] for el in meters if el['WATER_TYPE_ABBR'] == 'cold'][0]
+    hot_id = [el['ID'] for el in meters if el['WATER_TYPE_ABBR'] == 'hot'][0]
     event_code = meters[0]['REGISTER_POINT_EVENT_TYPE_CODE']
 
     req_data = {
