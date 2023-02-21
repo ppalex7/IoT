@@ -11,7 +11,9 @@ logger.setLevel(logging.DEBUG)
 
 
 def lambda_handler(event, context):
-    r = submit_meters(50, 24)
+    (cold, hot) = parse_input(event)
+    logger.info("Processing meter values: cold %d, hot %d", cold, hot)
+    r = submit_meters(cold, hot)
     return {
         'statusCode': 200,
         'body': """
@@ -19,6 +21,14 @@ def lambda_handler(event, context):
             Ответ: {}
         """.strip().format(json.dumps(r)),
     }
+
+
+def parse_input(input):
+    try:
+        return (int(input['cold']), int(input['hot']))
+    except (KeyError, ValueError) as e:
+        logger.error("Values not found or specified in incorrect format. Input was: %s", input)
+        raise Exception("Invalid input")
 
 
 def dc():
