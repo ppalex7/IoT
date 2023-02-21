@@ -17,9 +17,9 @@ def lambda_handler(event, context):
     return {
         'statusCode': 200,
         'body': """
-            Показания отправлены в Мосводоканал.
+            Показания отправлены в Мосводоканал: Х {}, Г {}.
             Ответ: {}
-        """.strip().format(json.dumps(r)),
+        """.strip().format(cold, hot, json.dumps(r)),
     }
 
 
